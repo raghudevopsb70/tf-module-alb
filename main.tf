@@ -11,6 +11,14 @@ resource "aws_security_group" "main" {
     cidr_blocks = var.allow_cidr
   }
 
+  ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = var.allow_cidr
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -52,6 +60,15 @@ resource "aws_lb_listener" "backend" {
       status_code  = "503"
     }
   }
+}
+
+resource "aws_route53_record" "public_lb" {
+  count   = var.internal ? 1 : 0
+  zone_id = "Z0366464237Z7LZLZPKFA"
+  name    = var.dns_domain
+  type    = "CNAME"
+  ttl     = 30
+  records = [aws_lb.main.dns_name]
 }
 
 
